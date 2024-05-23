@@ -1,0 +1,97 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.upload-area {
+    border: 2px dashed #007BFF;
+    border-radius: 10px;
+    padding: 40px;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 500px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    border-color: #0056b3;
+    background-color: #e0e0e0;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    flex-wrap: wrap;
+}
+
+.color-option {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+.color-option input[type="radio"] {
+    display: none;
+}
+
+.color-option .color-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #f0f0f0; /* Match the background color */
+    transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.color-option input[type="radio"]:checked + .color-preview {
+    border-color: #007BFF;
+    box-shadow: 0 0 0 3px #007BFF;
+}
+
+.button {
+    margin: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.button:not(:disabled):hover {
+    background-color: #0056b3;
+}
+
+#canvas {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fullscreen-dragover {
+    background-color: rgba(0, 123, 255, 0.25);
+}

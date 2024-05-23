@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gradient Mapper</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Image Gradient Mapper</h1>
+    <div class="upload-area" id="uploadArea">
+        Drag and drop an image here or click to upload
+        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+    </div>
+    <div class="controls">
+        <label class="color-option">
+            <input type="radio" name="colorOption" value="option1" checked>
+            <span class="color-preview" style="background: linear-gradient(45deg, #FC5467 50%, #353745 50%);"></span>
+        </label>
+        <label class="color-option">
+            <input type="radio" name="colorOption" value="option2">
+            <span class="color-preview" style="background: linear-gradient(45deg, #9da5b3 50%, #2a3e81 50%);"></span>
+        </label>
+    </div>
+    <button class="button" id="downloadButton" disabled>Download Image</button>
+    <canvas id="canvas"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
