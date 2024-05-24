@@ -183,7 +183,7 @@ async function getOptimalQuality() {
     let blob = await getBlobFromCanvas(quality);
     let size = blob.size / 1024; // size in KB
 
-    while (size > 500) {
+    while (size > 3000) {
         quality -= 0.05;
         if (quality <= 0) {
             quality = 0.1;
