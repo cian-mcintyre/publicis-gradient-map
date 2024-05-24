@@ -83,9 +83,25 @@ function handleFile(file) {
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
+            // Get viewport dimensions
+            const maxWidth = window.innerWidth * 0.8;
+            const maxHeight = window.innerHeight * 0.8;
+
+            // Calculate scaling to fit the image within the viewport while maintaining aspect ratio
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+            }
+            if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
             originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height); // Save the original image data
             applyGradientMap();
         }
