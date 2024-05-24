@@ -1,9 +1,12 @@
 const uploadArea = document.getElementById('uploadArea');
 const imageUpload = document.getElementById('imageUpload');
 const downloadButton = document.getElementById('downloadButton');
+const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const contrastSlider = document.getElementById('contrastSlider');
+const highlightsSlider = document.getElementById('highlightsSlider');
+const shadowsSlider = document.getElementById('shadowsSlider');
 const qualitySlider = document.getElementById('qualitySlider');
 
 let originalImageData = null;
@@ -58,14 +61,24 @@ contrastSlider.addEventListener('input', () => {
     if (canvas.width > 0) applyGradientMap();
 });
 
-document.querySelectorAll('input[name="colorOption"]').forEach((elem) => {
-    elem.addEventListener('change', () => {
-        if (canvas.width > 0) applyGradientMap();
-    });
+highlightsSlider.addEventListener('input', () => {
+    if (canvas.width > 0) applyGradientMap();
+});
+
+shadowsSlider.addEventListener('input', () => {
+    if (canvas.width > 0) applyGradientMap();
 });
 
 qualitySlider.addEventListener('input', () => {
     if (canvas.width > 0) updateEstimatedSize();
+});
+
+resetButton.addEventListener('click', resetAdjustments);
+
+document.querySelectorAll('input[name="colorOption"]').forEach((elem) => {
+    elem.addEventListener('change', () => {
+        if (canvas.width > 0) applyGradientMap();
+    });
 });
 
 downloadButton.addEventListener('click', () => {
@@ -81,11 +94,9 @@ function handleFile(file) {
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            // Get viewport dimensions
-            const maxWidth = window.innerWidth * 0.8;
-            const maxHeight = window.innerHeight * 0.8;
-
-            // Calculate scaling to fit the image within the viewport while maintaining aspect ratio
+            // Calculate scaling to fit the image within the content area while maintaining aspect ratio
+            const maxWidth = canvas.parentElement.clientWidth;
+            const maxHeight = canvas.parentElement.clientHeight;
             let width = img.width;
             let height = img.height;
             if (width > maxWidth) {
@@ -114,14 +125,17 @@ function handleFile(file) {
 function applyGradientMap() {
     if (!originalImageData) return;
 
-    // Get contrast value
+    // Get contrast, highlights, and shadows values
     const contrast = contrastSlider.value;
+    const highlights = highlightsSlider.value;
+    const shadows = shadowsSlider.value;
 
     // Create a new imageData object to avoid modifying the original image data
     const imageData = new ImageData(new Uint8ClampedArray(originalImageData.data), originalImageData.width, originalImageData.height);
     const data = imageData.data;
 
     adjustContrast(data, contrast);
+    adjustHighlightsShadows(data, highlights, shadows);
 
     let color1, color2;
     const selectedOption = document.querySelector('input[name="colorOption"]:checked').value;
@@ -163,6 +177,23 @@ function adjustContrast(data, contrast) {
     }
 }
 
+function adjustHighlightsShadows(data, highlights, shadows) {
+    highlights = (highlights / 100);
+    shadows = (shadows / 100);
+
+    for (let i = 0; i < data.length; i += 4) {
+        // Adjust highlights
+        data[i] = data[i] + ((255 - data[i]) * highlights);
+        data[i + 1] = data[i + 1] + ((255 - data[i + 1]) * highlights);
+        data[i + 2] = data[i + 2] + ((255 - data[i + 2]) * highlights);
+
+        // Adjust shadows
+        data[i] = data[i] * shadows;
+        data[i + 1] = data[i + 1] * shadows;
+        data[i + 2] = data[i + 2] * shadows;
+    }
+}
+
 function interpolateColor(color1, color2, t) {
     const r = Math.round(color1[0] * (1 - t) + color2[0] * t);
     const g = Math.round(color1[1] * (1 - t) + color2[1] * t);
@@ -188,4 +219,11 @@ function updateEstimatedSize() {
         const fileSize = (blob.size / 1024).toFixed(2); // Size in KB
         downloadButton.textContent = `Download Image (${fileSize} KB)`;
     }, 'image/jpeg', quality);
+}
+
+function resetAdjustments() {
+    contrastSlider.value = 0;
+    highlightsSlider.value = 0;
+    shadowsSlider.value = 100;
+    applyGradientMap();
 }
