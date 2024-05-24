@@ -173,7 +173,7 @@ function hexToRgb(hex) {
 }
 
 function resetAdjustments() {
-    highlightsSlider.value = 100;
+    highlightsSlider.value = 0;
     shadowsSlider.value = 100;
     applyGradientMap();
 }
