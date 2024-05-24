@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Publicis Image Gradient Mapper</h1>
+    <h1>Image Gradient Mapper</h1>
     <div class="upload-area" id="uploadArea">
         Drag and drop an image here or click to upload
         <input type="file" id="imageUpload" accept="image/*" style="display: none;">
@@ -26,10 +26,6 @@
                     </label>
                 </div>
                 <div class="adjustment">
-                    <label for="contrastSlider">Contrast:</label>
-                    <input type="range" id="contrastSlider" min="0" max="200" value="0">
-                </div>
-                <div class="adjustment">
                     <label for="highlightsSlider">Highlights:</label>
                     <input type="range" id="highlightsSlider" min="0" max="200" value="0">
                 </div>
@@ -42,10 +38,6 @@
                 </div>
             </div>
             <div class="quality-box">
-                <div class="adjustment">
-                    <label for="qualitySlider">Quality:</label>
-                    <input type="range" id="qualitySlider" min="0" max="100" value="90">
-                </div>
                 <div class="button-container">
                     <button class="button" id="downloadButton" disabled>Download Image</button>
                 </div>

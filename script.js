@@ -4,10 +4,8 @@ const downloadButton = document.getElementById('downloadButton');
 const resetButton = document.getElementById('resetButton');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const contrastSlider = document.getElementById('contrastSlider');
 const highlightsSlider = document.getElementById('highlightsSlider');
 const shadowsSlider = document.getElementById('shadowsSlider');
-const qualitySlider = document.getElementById('qualitySlider');
 
 let originalImageData = null;
 
@@ -57,20 +55,12 @@ imageUpload.addEventListener('change', (e) => {
     }
 });
 
-contrastSlider.addEventListener('input', () => {
-    if (canvas.width > 0) applyGradientMap();
-});
-
 highlightsSlider.addEventListener('input', () => {
     if (canvas.width > 0) applyGradientMap();
 });
 
 shadowsSlider.addEventListener('input', () => {
     if (canvas.width > 0) applyGradientMap();
-});
-
-qualitySlider.addEventListener('input', () => {
-    if (canvas.width > 0) updateEstimatedSize();
 });
 
 resetButton.addEventListener('click', resetAdjustments);
@@ -81,11 +71,11 @@ document.querySelectorAll('input[name="colorOption"]').forEach((elem) => {
     });
 });
 
-downloadButton.addEventListener('click', () => {
-    const quality = qualitySlider.value / 100;
+downloadButton.addEventListener('click', async () => {
+    const quality = await getOptimalQuality();
     const link = document.createElement('a');
     link.download = 'gradient-mapped-image.jpg';
-    link.href = canvas.toDataURL('image/jpeg', quality); // Compress image as JPEG with selected quality
+    link.href = canvas.toDataURL('image/jpeg', quality); // Compress image as JPEG with calculated quality
     link.click();
 });
 
@@ -94,23 +84,9 @@ function handleFile(file) {
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            // Calculate scaling to fit the image within the content area while maintaining aspect ratio
-            const maxWidth = canvas.parentElement.clientWidth;
-            const maxHeight = canvas.parentElement.clientHeight;
-            let width = img.width;
-            let height = img.height;
-            if (width > maxWidth) {
-                height *= maxWidth / width;
-                width = maxWidth;
-            }
-            if (height > maxHeight) {
-                width *= maxHeight / height;
-                height = maxHeight;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
             originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height); // Save the original image data
             applyGradientMap();
         }
@@ -125,8 +101,7 @@ function handleFile(file) {
 function applyGradientMap() {
     if (!originalImageData) return;
 
-    // Get contrast, highlights, and shadows values
-    const contrast = contrastSlider.value;
+    // Get highlights and shadows values
     const highlights = highlightsSlider.value;
     const shadows = shadowsSlider.value;
 
@@ -134,7 +109,6 @@ function applyGradientMap() {
     const imageData = new ImageData(new Uint8ClampedArray(originalImageData.data), originalImageData.width, originalImageData.height);
     const data = imageData.data;
 
-    adjustContrast(data, contrast);
     adjustHighlightsShadows(data, highlights, shadows);
 
     let color1, color2;
@@ -164,17 +138,6 @@ function applyGradientMap() {
 
     ctx.putImageData(imageData, 0, 0);
     downloadButton.disabled = false;
-    updateEstimatedSize();
-}
-
-function adjustContrast(data, contrast) {
-    contrast = (contrast / 100) + 1;
-    const intercept = 128 * (1 - contrast);
-    for (let i = 0; i < data.length; i += 4) {
-        data[i] = truncate(data[i] * contrast + intercept);
-        data[i + 1] = truncate(data[i + 1] * contrast + intercept);
-        data[i + 2] = truncate(data[i + 2] * contrast + intercept);
-    }
 }
 
 function adjustHighlightsShadows(data, highlights, shadows) {
@@ -209,21 +172,42 @@ function hexToRgb(hex) {
     return [r, g, b];
 }
 
-function truncate(value) {
-    return Math.min(255, Math.max(0, value));
-}
-
-function updateEstimatedSize() {
-    const quality = qualitySlider.value / 100;
-    canvas.toBlob((blob) => {
-        const fileSize = (blob.size / 1024).toFixed(2); // Size in KB
-        downloadButton.textContent = `Download Image (${fileSize} KB)`;
-    }, 'image/jpeg', quality);
-}
-
 function resetAdjustments() {
-    contrastSlider.value = 0;
-    highlightsSlider.value = 0;
+    highlightsSlider.value = 100;
     shadowsSlider.value = 100;
     applyGradientMap();
+}
+
+async function getOptimalQuality() {
+    let quality = 1.0;
+    let blob = await getBlobFromCanvas(quality);
+    let size = blob.size / 1024; // size in KB
+
+    while (size > 500) {
+        quality -= 0.05;
+        if (quality <= 0) {
+            quality = 0.1;
+            break;
+        }
+        blob = await getBlobFromCanvas(quality);
+        size = blob.size / 1024;
+    }
+
+    while (size < 100) {
+        quality += 0.05;
+        if (quality >= 1.0) {
+            quality = 1.0;
+            break;
+        }
+        blob = await getBlobFromCanvas(quality);
+        size = blob.size / 1024;
+    }
+
+    return quality;
+}
+
+function getBlobFromCanvas(quality) {
+    return new Promise(resolve => {
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
+    });
 }
