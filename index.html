@@ -22,6 +22,14 @@
             <span class="color-preview" style="background: linear-gradient(45deg, #9da5b3 50%, #2a3e81 50%);"></span>
         </label>
     </div>
+    <div class="controls">
+        <label for="contrastSlider">Contrast:</label>
+        <input type="range" id="contrastSlider" min="0" max="200" value="0">
+    </div>
+    <div class="controls">
+        <label id="qualityLabel" for="qualitySlider">Quality: 90%</label>
+        <input type="range" id="qualitySlider" min="0" max="100" value="90">
+    </div>
     <button class="button" id="downloadButton" disabled>Download Image</button>
     <canvas id="canvas"></canvas>
     <script src="script.js"></script>

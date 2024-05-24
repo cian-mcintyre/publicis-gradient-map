@@ -3,6 +3,9 @@ const imageUpload = document.getElementById('imageUpload');
 const downloadButton = document.getElementById('downloadButton');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const contrastSlider = document.getElementById('contrastSlider');
+const qualitySlider = document.getElementById('qualitySlider');
+const qualityLabel = document.getElementById('qualityLabel');
 
 let originalImageData = null;
 
@@ -52,16 +55,26 @@ imageUpload.addEventListener('change', (e) => {
     }
 });
 
+contrastSlider.addEventListener('input', () => {
+    if (canvas.width > 0) applyGradientMap();
+});
+
 document.querySelectorAll('input[name="colorOption"]').forEach((elem) => {
     elem.addEventListener('change', () => {
         if (canvas.width > 0) applyGradientMap();
     });
 });
 
+qualitySlider.addEventListener('input', () => {
+    updateQualityLabel();
+    if (canvas.width > 0) updateEstimatedSize();
+});
+
 downloadButton.addEventListener('click', () => {
+    const quality = qualitySlider.value / 100;
     const link = document.createElement('a');
-    link.download = 'gradient-mapped-image.png';
-    link.href = canvas.toDataURL();
+    link.download = 'gradient-mapped-image.jpg';
+    link.href = canvas.toDataURL('image/jpeg', quality); // Compress image as JPEG with selected quality
     link.click();
 });
 
@@ -87,10 +100,14 @@ function handleFile(file) {
 function applyGradientMap() {
     if (!originalImageData) return;
 
-    ctx.putImageData(originalImageData, 0, 0); // Restore the original image data
+    // Get contrast value
+    const contrast = contrastSlider.value;
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // Create a new imageData object to avoid modifying the original image data
+    const imageData = new ImageData(new Uint8ClampedArray(originalImageData.data), originalImageData.width, originalImageData.height);
     const data = imageData.data;
+
+    adjustContrast(data, contrast);
 
     let color1, color2;
     const selectedOption = document.querySelector('input[name="colorOption"]:checked').value;
@@ -119,6 +136,17 @@ function applyGradientMap() {
 
     ctx.putImageData(imageData, 0, 0);
     downloadButton.disabled = false;
+    updateEstimatedSize();
+}
+
+function adjustContrast(data, contrast) {
+    contrast = (contrast / 100) + 1;
+    const intercept = 128 * (1 - contrast);
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = truncate(data[i] * contrast + intercept);
+        data[i + 1] = truncate(data[i + 1] * contrast + intercept);
+        data[i + 2] = truncate(data[i + 2] * contrast + intercept);
+    }
 }
 
 function interpolateColor(color1, color2, t) {
@@ -134,4 +162,20 @@ function hexToRgb(hex) {
     const g = (bigint >> 8) & 255;
     const b = bigint & 255;
     return [r, g, b];
+}
+
+function truncate(value) {
+    return Math.min(255, Math.max(0, value));
+}
+
+function updateQualityLabel() {
+    qualityLabel.textContent = `Quality: ${qualitySlider.value}`;
+}
+
+function updateEstimatedSize() {
+    const quality = qualitySlider.value / 100;
+    canvas.toBlob((blob) => {
+        const fileSize = (blob.size / 1024).toFixed(2); // Size in KB
+        downloadButton.textContent = `Download Image (${fileSize} KB)`;
+    }, 'image/jpeg', quality);
 }

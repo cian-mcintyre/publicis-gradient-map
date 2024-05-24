@@ -62,6 +62,14 @@ h1 {
     box-shadow: 0 0 0 3px #007BFF;
 }
 
+#contrastSlider {
+    margin: 0 10px;
+}
+
+#qualitySlider {
+    margin: 0 10px;
+}
+
 .button {
     margin: 20px;
     padding: 10px 20px;
