@@ -5,7 +5,6 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const contrastSlider = document.getElementById('contrastSlider');
 const qualitySlider = document.getElementById('qualitySlider');
-const qualityLabel = document.getElementById('qualityLabel');
 
 let originalImageData = null;
 
@@ -66,7 +65,6 @@ document.querySelectorAll('input[name="colorOption"]').forEach((elem) => {
 });
 
 qualitySlider.addEventListener('input', () => {
-    updateQualityLabel();
     if (canvas.width > 0) updateEstimatedSize();
 });
 
@@ -182,10 +180,6 @@ function hexToRgb(hex) {
 
 function truncate(value) {
     return Math.min(255, Math.max(0, value));
-}
-
-function updateQualityLabel() {
-    qualityLabel.textContent = `Quality: ${qualitySlider.value}`;
 }
 
 function updateEstimatedSize() {
